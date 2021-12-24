@@ -64,29 +64,29 @@ public class DpendencyRelatedMain extends DevApp {
         Map<String,List<PairRelation>> vRelations=readRelations("D:\\data\\versionRelations.xls",microserviceNames);//读取5个版本带权重的依赖
         //zx for (int i = 0; i < versionsInfoForRelease.getVersions().size(); i++)
         {
-            Version version = versionsInfoForRelease.getVersions().get(0);
+            //zx Version version = versionsInfoForRelease.getVersions().get(0);
             // 查询version版本下的所有微服务
             String vmm = "x_3c9_x_95d.x_893.x_893.x_e09d_";//zx
-            MicroservicesInfo microservices = DataAction.queryLastMicroservices(context, reposInfo.getId(), null, version);
+            //zx MicroservicesInfo microservices = DataAction.queryLastMicroservices(context, reposInfo.getId(), null, version);
             //zx MicroservicesInfo microservices = DataAction.queryLastMicroservices_zx(context, reposInfo.getId(), null, vmm);//zx
             //存储单个版中所有微服务名称
             //zx List<String> microserviceNames = microservices.microserviceNames();
 
             // 计算并存储微服务间的调用关系，用于后续架构异味的计算
             List<PairRelation> rels=new ArrayList<>();
-            for(String vmm_tmp:vRelations.keySet()){
-                if(version.getVersionName().startsWith(vmm_tmp)){
-                    rels.addAll(vRelations.get(vmm_tmp));
-                }
-            }
+//zx            for(String vmm_tmp:vRelations.keySet()){
+//                if(version.getVersionName().startsWith(vmm_tmp)){
+//                    rels.addAll(vRelations.get(vmm_tmp));
+//                }
+//            }
             HashSet set = new HashSet(microserviceNames);
             microserviceNames.clear();
             microserviceNames.addAll(set);
 
-            //rels.addAll(vRelations.get(vmm));//zx
+            rels.addAll(vRelations.get(vmm));//zx
 
             //String vmm=version.getVersionName();
-            //MicroservicesInfo microservices = new MicroservicesInfo();//zx
+            MicroservicesInfo microservices = new MicroservicesInfo();//zx
 
             PairRelationsInfo pairRelationsInfoWithWeight = microservices.callRelationsInfoByTopicWithJsonNew(true,rels);
             pairRelationsInfoWithWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
@@ -112,8 +112,8 @@ public class DpendencyRelatedMain extends DevApp {
 
 
             ResultForAllMs resultForMs = new ResultForAllMs();
-            result.put(version.getVersionName(), resultForMs);
-            //result.put(vmm, resultForMs);//zx
+            //zx result.put(version.getVersionName(), resultForMs);
+            result.put(vmm, resultForMs);//zx
             resultForMs.setMicroservice(microserviceNames);
             resultForMs.setHublike_weight(hublike_weight.getValueMap());
             resultForMs.setHublike_weight_in(hublike_weight_in.getValueMap());
