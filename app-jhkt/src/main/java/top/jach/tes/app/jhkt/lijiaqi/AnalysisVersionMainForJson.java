@@ -82,7 +82,7 @@ public class AnalysisVersionMainForJson extends DevApp {
 //        List<MetricsInfo> metricsInfos=new ArrayList<>();//创建excel表格可维护性数据信息的源数据
 
         Result result = new Result();
-        for (int i = 0; i < versionsInfoForRelease.getVersions().size()-1; i++) {
+        for (int i = 0; i < versionsInfoForRelease.getVersions().size(); i++) {
             Version version = versionsInfoForRelease.getVersions().get(i);
 
             // 查询version版本下的所有微服务
@@ -92,10 +92,10 @@ public class AnalysisVersionMainForJson extends DevApp {
             List<String> microserviceNames = microservices.microserviceNames();
 
             // 计算并存储微服务间的调用关系，用于后续架构异味的计算
-            PairRelationsInfo pairRelationsInfoWithWeight = microservices.callRelationsInfoByTopic(true);
+            PairRelationsInfo pairRelationsInfoWithWeight = microservices.callRelationsInfoByTopicWithJson(true,"D:\\data\\relations.json");
             pairRelationsInfoWithWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
             InfoTool.saveInputInfos(pairRelationsInfoWithWeight);
-            PairRelationsInfo pairRelationsInfoWithoutWeight = microservices.callRelationsInfoByTopic(false).deWeight();
+            PairRelationsInfo pairRelationsInfoWithoutWeight = microservices.callRelationsInfoByTopicWithJson(false,"D:\\data\\relations.json").deWeight();
             pairRelationsInfoWithoutWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
             InfoTool.saveInputInfos(pairRelationsInfoWithoutWeight);
 
@@ -123,13 +123,14 @@ public class AnalysisVersionMainForJson extends DevApp {
             ElementsValue hublike_weight = HublinkAction.calculateHublike(pairRelationsInfoWithWeight);
             ElementsValue hublike_no_weight = HublinkAction.calculateHublike(pairRelationsInfoWithoutWeight);
             ElementsValue cyclicResult = CyclicAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
-            ElementsValue udResult= UdAction.calculateUd(microservices,pairRelationsInfoWithWeight);
-            ElementsValue uiResult= UiAction.calculateUi(gitCommits,5,microservices,pairRelationsInfoWithoutWeight,5.0,4.0,8.0);
-            ElementsValue sdResult= SloppyAction.calculateSD(microservices,pairRelationsInfoWithoutWeight,2.0);
+            //ElementsValue udResult= UdAction.calculateUd(microservices,pairRelationsInfoWithWeight);
+            //ElementsValue uiResult= UiAction.calculateUi(gitCommits,5,microservices,pairRelationsInfoWithoutWeight,5.0,4.0,8.0);
+            //ElementsValue sdResult= SloppyAction.calculateSD(microservices,pairRelationsInfoWithoutWeight,2.0);
 //            ElementsValue undirectedCyclicResult = CyclicAction.CalculateUndirectedCyclic(context, microservices, pairRelationsInfo);
             //计算mv架构异味
 //            List<Mv> mvs = Mv.CalculateMvs(new int[]{3,5,7,9},new int[]{5,7,10},new double[]{0.5,0.7,0.8,0.9},gitCommits, microservices.getMicroservices());
-            List<Mv> mvs = Mv.CalculateMvs(new int[]{5},new int[]{10},new double[]{0.5},gitCommits, microservices.getMicroservices());
+            List<Mv> mvs = Mv.CalculateMvs(new int[]{5},new int[]{10},new int[]{5},new double[]{0.5},gitCommits, microservices.getMicroservices());
+
 
             ResultForMs resultForMs = new ResultForMs();
             result.put(version.getVersionName(), resultForMs);
@@ -138,9 +139,9 @@ public class AnalysisVersionMainForJson extends DevApp {
             resultForMs.setHublikeWithWeight(hublike_weight.getValueMap());
             resultForMs.setHublikes(hublike_no_weight.getValueMap());
             resultForMs.setMvs(mvs);
-            resultForMs.setUnstableDependency(udResult.getValueMap());
-            resultForMs.setUnstableInterface(uiResult.getValueMap());
-            resultForMs.setSloppys(sdResult.getValueMap());
+            //resultForMs.setUnstableDependency(udResult.getValueMap());
+            //resultForMs.setUnstableInterface(uiResult.getValueMap());
+            //resultForMs.setSloppys(sdResult.getValueMap());
 
             MainTainsInfo mainTainsInfo = MainTainsInfo.newCreateInfo(DataAction.DefaultReposId,
                     microservices,
@@ -159,7 +160,7 @@ public class AnalysisVersionMainForJson extends DevApp {
         // 数据导出
 //        exportCSV(microserviceAttrsInfos, new File("D:\\data\\tes\\analysis\\csv"));
 //        exportExcel(microserviceAttrsInfos,correlationDataInfos,metricsInfos, new File("F:\\data\\tes\\analysis"));
-        exportCsv(result, new File("D:/data/tes/analysis/csv"));
+        exportCsv(result, new File("D:/data/tes/analysis1/csv"));
 
         for (Map.Entry<String, ResultForMs> entry:
                 result.getResults().entrySet()) {
@@ -222,9 +223,18 @@ public class AnalysisVersionMainForJson extends DevApp {
             for (String microservice:
                 resultForMs.getMicroservice()) {
                 Double hub = resultForMs.getHublikes().get(microservice);
-                if(hub ==null || hub==0){
+               /* if(hub ==null || hub==0){
+                    for(Field field:fields){
+                        String fName = field.getName();
+                        if(fName.equals("mvs")){
+                            sb.append(0).append(',').append(0).append(',');//孤立的微服务自然不会存在隐性依赖
+                        }else if(fName.equals("microservice")){
+                            sb.append(microservice).append(',');
+                        }
+                    }
+                    sb.append('\n');
                     continue;
-                }
+                }*/
                 JSONObject jsonM = new JSONObject();
                 jsonArrayMs.add(jsonM);
                 for (Field field:
@@ -259,6 +269,9 @@ public class AnalysisVersionMainForJson extends DevApp {
                             if(val!=null) {
                                 sb.append(val);
                                 jsonM.put(fieldName, val);
+                            }else{
+                                sb.append(0);
+                                jsonM.put(fieldName,0);
                             }
                             sb.append(',');
                             break;
@@ -341,6 +354,8 @@ public class AnalysisVersionMainForJson extends DevApp {
                     .append(cds.get(microservice)).append('\n');
         }
         sb.append('\n');
+
+
         sb.append("MV All\n");
         Map<String, StringBuilder> mvs = new HashMap<>();
         sb.append("microservice,");
@@ -388,16 +403,20 @@ public class AnalysisVersionMainForJson extends DevApp {
         FileUtils.write(new File(dir.getAbsolutePath()+"/lijiaqidata.json"),jsonObject.toJSONString(), "utf8", false);
         sb = null;
 
-        StringBuilder sb1 = new StringBuilder().append("file,targetFile,count,per\n");
+        StringBuilder sb1 = new StringBuilder().append("file,targetFile,targetMicro,count,per\n");
         StringBuilder sb2 = new StringBuilder(sb1);
         StringBuilder sb3 = new StringBuilder(sb1);
+        StringBuilder sb4=new StringBuilder(sb1);
         int i=0;
         for (Map.Entry<String, ResultForMs> entry:
                 result.getResults().entrySet()) {
-            i++;
-            if(i!=4){
+            if(!entry.getKey().equals("x_3c9_x_95d.x_893.x_893.x_e09d_x_43_x_8b_x_e09f_x_e0a1")){
                 continue;
             }
+           /* i++;
+            if(i!=4){
+                continue;
+            }*/
             String version = entry.getKey();
             ResultForMs resultForMs = entry.getValue();
             Mv mv = resultForMs.getMvs().get(0);
@@ -410,10 +429,14 @@ public class AnalysisVersionMainForJson extends DevApp {
             statisticsMvResult(sb2, mv, mrm2);
             MvResult.MvResultForMicroservice mrm3 = map.get("x_3f/x_6f2b");
             statisticsMvResult(sb3, mv, mrm3);
+
+            MvResult.MvResultForMicroservice mrm4=map.get("x_f/x_1b");
+            statisticsMvResult(sb4,mv,mrm4);
         }
         FileUtils.write(new File(dir.getAbsolutePath()+"/lijiaqidata_3_4_mv_46f.csv"),sb1, "utf8", false);
         FileUtils.write(new File(dir.getAbsolutePath()+"/lijiaqidata_3_4_mv_663.csv"),sb2, "utf8", false);
         FileUtils.write(new File(dir.getAbsolutePath()+"/lijiaqidata_3_4_mv_6f2b.csv"),sb3, "utf8", false);
+        FileUtils.write(new File(dir.getAbsolutePath()+"/lijiaqidata_3_4_mv_x1b.csv"),sb4, "utf8", false);
 
     }
 
@@ -430,7 +453,7 @@ public class AnalysisVersionMainForJson extends DevApp {
                 String targetFile = targetFileEntry.getKey();
                 Integer count = targetFileEntry.getValue();
                 Double per = Double.valueOf(count)/fcc;
-                if(per>=0.5) {
+                if(per>=0.5) {//这里只输出当前微服务出发的文件对依赖，比如a服务这里只有1个文件对，但在b,c,d服务中也存在和a的文件对
                     sb1.append(file).append(',').append(targetFile).append(',').append(count).append(',').append(per).append('\n');
                 }
             }

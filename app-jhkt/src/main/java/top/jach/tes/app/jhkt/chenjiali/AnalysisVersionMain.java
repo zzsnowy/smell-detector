@@ -217,9 +217,9 @@ public static Double getPearsonBydim(List<Double> ratingOne, List<Double> rating
         }
         FileUtils.cleanDirectory(dir);
         for (MicroserviceAttrsInfo mai :
-                microserviceAttrsInfos) {
+                microserviceAttrsInfos) {//每轮循环代表一个版本的计算数据
             String version = mai.getVersion();
-            File file = new File(dir.getAbsolutePath()+"/"+version+".csv");
+            File file = new File(dir.getAbsolutePath()+"/"+version+".csv");//按每个版本创建一个csv文件
             StringBuilder sb = new StringBuilder();
             Field[] fields = MicroserviceAttr.class.getDeclaredFields();
             for (Field field:
@@ -227,7 +227,7 @@ public static Double getPearsonBydim(List<Double> ratingOne, List<Double> rating
                 sb.append(field.getName());
                 sb.append(',');
             }
-            sb.append('\n');
+            sb.append('\n');//文件写入是按行写入的，目前是把csv文件的表头赋值好了，故换行
             for (MicroserviceAttr ma :
                     mai.getMicroserviceAttrs()) {
                 for (Field field:
@@ -238,8 +238,8 @@ public static Double getPearsonBydim(List<Double> ratingOne, List<Double> rating
                         sb.append(val);
                     }
                     sb.append(',');
-                }
-                sb.append('\n');
+                }//获取表头所有属性的值
+                sb.append('\n');//表头下面的某一行数据，要换行
             }
             FileUtils.write(file, sb.toString(), "utf8");
         }

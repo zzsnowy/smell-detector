@@ -1,8 +1,10 @@
 package top.jach.tes.plugin.jhkt.microservice;
 
+import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import top.jach.tes.core.api.domain.info.Info;
 import top.jach.tes.core.api.domain.info.InfoProfile;
@@ -12,6 +14,10 @@ import top.jach.tes.core.impl.domain.relation.PairRelation;
 import top.jach.tes.core.impl.domain.relation.PairRelationsInfo;
 import top.jach.tes.plugin.tes.code.repo.WithRepo;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Getter
@@ -37,7 +43,7 @@ public class MicroservicesInfo extends ElementsInfo<Microservice> implements Wit
         for (Microservice m :
                 this) {
             names.add(m.getElementName());
-        };
+        }
         return names;
     }
 
@@ -84,6 +90,86 @@ public class MicroservicesInfo extends ElementsInfo<Microservice> implements Wit
         return microservices;
     }
 
+    public static Map<PairRelation,Double> relationCount(String path) throws IOException {
+        Map<PairRelation,Double> res=new HashMap<>();
+        Gson gson=new Gson();
+        String str= FileUtils.readFileToString(new File(path),"utf8");
+        JsonRelation jsonRelation=gson.fromJson(str,JsonRelation.class);
+        for(PairRelation pr:jsonRelation.getRelations()){
+            if(res.isEmpty()){
+                res.put(pr,1.0);
+                continue;
+            }
+            boolean flag=true;
+            for(PairRelation par:res.keySet()){
+                if(par.getSourceName().equals(pr.getSourceName())&&par.getTargetName().equals(pr.getTargetName())){
+                    res.put(par,res.get(par)+1.0);
+                    flag=false;
+                    break;
+                }
+            }
+            if(flag){
+                res.put(pr,1.0);
+            }
+        }
+        return res;
+    }
+    //最新的
+    public PairRelationsInfo callRelationsInfoByTopicWithJsonNew(boolean weight,List<PairRelation> rels) throws IOException {
+        PairRelationsInfo pairRelations = PairRelationsInfo.createInfo().setSourceElementsInfo(InfoProfile.createFromInfo(this));
+       for(PairRelation pr:rels){
+           PairRelation prr=new PairRelation(pr.getSourceName(),pr.getTargetName());
+           if(weight){
+               prr.setValue(pr.getValue());
+           }else{
+               prr.setValue(1d);
+           }
+           pairRelations.addRelation(prr);
+       }
+        return pairRelations;
+    }
+
+    public PairRelationsInfo callRelationsInfoByTopicWithJson(boolean weight,String path) throws IOException {
+        PairRelationsInfo pairRelations = PairRelationsInfo.createInfo().setSourceElementsInfo(InfoProfile.createFromInfo(this));
+        Map<PairRelation,Double> relationDouble=relationCount(path);//所有relation带权重，所有版本relation的并集
+        List<PairRelation> tmp=new ArrayList<>();
+        for (Microservice microservice :
+                this.microservices) {
+            for (String pubTopic :
+                    microservice.getPubTopics()) {
+                List<Microservice> subMicroservices = getMicroserviceBySubTopic(pubTopic);
+                for (Microservice subMicroservice :
+                        subMicroservices) {
+                    if(microservice.getElementName().equals(subMicroservice.getElementName())){
+                        continue;
+                    }
+                    PairRelation prl=new PairRelation(microservice.getElementName(), subMicroservice.getElementName());
+                    prl.setValue(1d);
+                    tmp.add(prl);
+                }
+            }
+        }
+        for(PairRelation prr:tmp){
+            double val=0;
+            boolean isExist=false;
+            for(PairRelation pp:relationDouble.keySet()){
+                if(pp.getSourceName().equals(prr.getSourceName())&&pp.getTargetName().equals(prr.getTargetName())){
+                    val=relationDouble.get(pp);
+                    isExist=true;
+                    break;
+                }
+            }
+            if(isExist){
+                if(weight){
+                    prr.setValue(val);
+                }else{
+                    prr.setValue(1.0);
+                }
+                pairRelations.addRelation(prr);
+            }
+        }
+        return pairRelations;
+    }
     public PairRelationsInfo callRelationsInfoByTopic(boolean weight){
         PairRelationsInfo pairRelations = PairRelationsInfo.createInfo().setSourceElementsInfo(InfoProfile.createFromInfo(this));
       //  List<PairRelation> relationList=new ArrayList<>();//为了去重

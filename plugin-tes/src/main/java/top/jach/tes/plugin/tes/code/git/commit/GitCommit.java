@@ -38,7 +38,7 @@ public class GitCommit extends Element implements Comparable<GitCommit>{
     private Integer parentCount;
     private Set<String> parentShas = new HashSet<>();
     private Set<String> cherriedFromShas = new HashSet<>();
-    private List<DiffFile> diffFiles = new ArrayList<>();
+    private List<DiffFile> diffFiles = new ArrayList<>();//每个提交中所提交的所有文件的信息封装在DiffFile类中
     private StatisticDiffFiles statisticDiffFiles;
 
     public static GitCommit createByRevCommit(Long reposId, String repoName, RevCommit commit, Git git, RevWalk revWalk, DiffFormatter df) throws IOException, GitAPIException {

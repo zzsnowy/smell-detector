@@ -19,6 +19,9 @@ import top.jach.tes.plugin.jhkt.arcsmell.hublink.HublinkAction;
 import top.jach.tes.plugin.jhkt.microservice.Microservice;
 import top.jach.tes.plugin.jhkt.microservice.MicroservicesInfo;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -50,7 +53,9 @@ public class UdAction implements Action{
                 InfoField.createField(PAIR_RELATIONS_INFO).setInfoClass(PairRelationsInfo.class)
         );
     }
+
 //计算所有微服务对应的instability值
+//instability值越大说明传出耦合越多，越不稳定
     public static Map<String,Double> calInstability(MicroservicesInfo microservices,PairRelationsInfo pairRelationsInfo){
         Map<String,Double> insMap=new HashMap<>();
         HublinkAction hubAction=new HublinkAction();
@@ -61,7 +66,7 @@ public class UdAction implements Action{
             String microName=micro.getElementName();
             double inValue=0.0;
             double outValue=0.0;
-            double value=1.0;
+            double value=0.0;//存在某些孤立的微服务，不依赖于任何微服务
             if(inElement.getValueMap().containsKey(microName)){
                 inValue=inElement.getValueMap().get(microName);
             }
@@ -95,6 +100,54 @@ public class UdAction implements Action{
         return microDependenciesMap;
     }
 
+    public static ElementsValue calculateUdNew(MicroservicesInfo microservices,PairRelationsInfo pairRelationsInfo){
+        //所有微服务对应的instability值（得到的instability值不是0.5就是1,1表示不依赖别人也不被别人依赖）
+        Map<String,Double> microInstabMap=calInstability(microservices,pairRelationsInfo);
+        //所有微服务对应的依赖服务集合（√）注意有可能存在某微服务对应的依赖服务集合为空，比如x_1f,x_f/x_125,x_13/x_843这三个
+        Map<String,List<String>> microDependenciesMap=getDependencies(microservices,pairRelationsInfo);
+        //所有微服务对应的ud检测结果
+        Map<String,Double> resultMap=new HashMap<>();
+        //所有微服务对应的详细到哪一个微服务的ud检测结果
+        Map<String,List<String>> microUnstable=new HashMap<>();
+        for(Microservice micro:microservices){
+            String microName=micro.getElementName();
+            //double udValue=0.0;
+            double badCount=0.0;
+            List<String> unstableDepends=new ArrayList<>();
+            List<String> dependlist=microDependenciesMap.get(microName);
+            if(dependlist.size()==0){
+                resultMap.put(microName,badCount);
+                continue;
+            }else{
+                double microIns=microInstabMap.get(microName);
+                /*for(Map.Entry<String,Double> s:microInstabMap.entrySet())
+                {
+                    System.out.println("键值对："+s);
+                }zx*/
+                for(String str:dependlist){
+                    //System.out.println("str字符串为:"+str);zx
+                    double dependIns=microInstabMap.get(str);
+                    if(microIns<dependIns){//instability值越大说明传出耦合越多，越不稳定
+                        badCount=badCount+1.0;//为什么用+=1.0时，上面badCount显示变量未使用？
+                        unstableDepends.add(str);
+                    }
+                }
+
+                //udValue=badCount/(dependlist.size());//UoUD值
+                resultMap.put(microName,badCount);//微服务出现badDependency的次数，即被ud影响的次数
+                microUnstable.put(microName,unstableDepends);//微服务与哪些微服务存在unstable依赖
+            }
+
+        }
+
+        ElementsValue element=ElementsValue.createInfo();
+        for(String key:resultMap.keySet()){
+            double value=resultMap.get(key);
+            element.put(key,value);
+        }
+        return element;
+
+    }
     public static ElementsValue calculateUd(MicroservicesInfo microservices,PairRelationsInfo pairRelationsInfo){
         //所有微服务对应的instability值（得到的instability值不是0.5就是1,1表示不依赖别人也不被别人依赖）
         Map<String,Double> microInstabMap=calInstability(microservices,pairRelationsInfo);
@@ -122,7 +175,6 @@ public class UdAction implements Action{
                 udValue=badCount/(dependlist.size());//UoUD值
                 resultMap.put(microName,udValue);
             }
-
 
         }
         ElementsValue element=ElementsValue.createInfo();

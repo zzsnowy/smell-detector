@@ -1,5 +1,6 @@
 package top.jach.tes.plugin.jhkt.arcsmell.ui;
 
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import org.apache.commons.compress.utils.Lists;
 import top.jach.tes.core.api.domain.action.Action;
 import top.jach.tes.core.api.domain.action.InputInfos;
@@ -67,6 +68,47 @@ public class UiAction implements Action{
             microDependenciesMap.put(microName,relist);
         }
         return microDependenciesMap;
+    }
+//某个微服务的修改，影响到了哪些文件；
+    //某个微服务的修改，会影响到哪些微服务,最终用UiResult来存储每个被依赖数大于impact的微服务的修改，影响了哪些文件以及微服务
+//这个才是有用的计算Ui
+    public static List<UiResult> calUi(List<GitCommit> gitCommits, int len, List<Microservice> microservices, PairRelationsInfo pairRelationsInfo, double impact){
+        List<UiResult> result=new ArrayList<>();
+        //这里写ui的输出逻辑，主要基于hublike和mv的结果做一层输出形式更改然后输出就可以了
+        ElementsValue inElement= HublinkAction.calculateHublikeIn(pairRelationsInfo);
+        Map<String,Double> inLinks=inElement.getValueMap();
+        Map<String, Map<String,Integer>> mvFiles= MvAction.detectMvResult(gitCommits,len,microservices).getResultFiles();
+        Map<String,Map<String,Integer>> mvMicros=MvAction.detectMvResultForUi(gitCommits,len,microservices).getResultFiles();
+        Map<String,Set<String>> mcroFiles=MvAction.findMicroFiles(gitCommits,microservices);
+        for(Microservice microservice:microservices){
+            String name=microservice.getElementName();
+            UiResult res=new UiResult();
+            Map<String,Integer> Ufiles=new HashMap<>();
+            //Map<String,Integer> Umicros=new HashMap<>();
+            res.setMicroservice(name);//对于每个微服务，若不满足条件，则uiresult后两个属性不设值，为空
+            res.setMsFiles(mcroFiles.get(name));
+            //在get(name)这一步有可能得到null，共21个微服务最后Hubike得到的是17个的值
+            if(inLinks.containsKey(name)){
+                if(inLinks.get(name)>impact){
+                    for(String file:mvFiles.keySet()){
+                        String prefix = MvAction.getMicroserviceNameByFilePath(file, microservices);//file对应的微服务名
+                        if(name.equals(prefix)){
+                            for(Map.Entry<String,Integer> en:mvFiles.get(file).entrySet()){
+                                Ufiles.put(en.getKey(),en.getValue());
+                            }
+                            //Ufiles.putAll(mvFiles.get(file));
+                        }
+                    }
+
+                    res.setUiFiles(Ufiles);//当前微服务所包含文件所影响的文件集合
+                    res.setUiMicroservices(mvMicros.get(name));//当前微服务影响的微服务集合
+                }
+            }
+
+            result.add(res);
+        }
+        //可参考自己原来写的calculateUi代码
+        return result;
     }
 
 

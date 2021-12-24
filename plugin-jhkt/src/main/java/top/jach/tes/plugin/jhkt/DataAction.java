@@ -85,7 +85,8 @@ public class DataAction implements Action {
         for (Version version :
                 versionsInfoForRelease.getVersions()) {
             // 查询当前版本的微服务
-            MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
+            /* zx
+            MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, vmm);
             if (microservices == null || microservices.getMicroservices().size()==0) {
                 continue;
             }
@@ -106,6 +107,7 @@ public class DataAction implements Action {
                 }
             }
             saveInfo(context, microservices);
+            */
         }
 
         for (Repo repo :
@@ -124,7 +126,7 @@ public class DataAction implements Action {
                     saveInfo(context, gitCommitsInfoForRepoVersion);
 
                     // 按微服务划分gitcommits
-                    MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
+                    /* zx MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
                     List<Microservice> ms = microservices.microservicesForRepo(repo.getName());
                     for (Microservice m :
                             ms) {
@@ -133,7 +135,7 @@ public class DataAction implements Action {
                         gitCommitsForMicroserviceInfo.setName(InfoNameConstant.GitCommitsForMicroservice);
                         gitCommitsForMicroserviceInfo.setVersion(version.getVersionName());
                         saveInfo(context, gitCommitsForMicroserviceInfo);
-                    }
+                    }*/
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -142,6 +144,7 @@ public class DataAction implements Action {
 
         for (Version version :
                 versionsInfoForRelease.getVersions()) {
+            /* zx
             MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
             if (microservices == null){
                 continue;
@@ -150,6 +153,7 @@ public class DataAction implements Action {
             PairRelationsInfo msCallRelations = microservices.callRelationsInfoByTopic(true);
             saveInfo(context, msCallRelations.setName(InfoNameConstant.MicroserviceCallRelation));
             msCallRelations = null;
+             */
         }
 
 
@@ -214,7 +218,7 @@ public class DataAction implements Action {
         return info;
     }
 
-    public static MicroservicesInfo queryLastMicroservices(Context context,Long reposId, String repoName, Version version) {
+    public static MicroservicesInfo queryLastMicroservices(Context context, Long reposId, String repoName, Version version) {
         MicroservicesInfo info = new MicroservicesInfo();
         info.setReposId(reposId);
         info.setRepoName(repoName);
@@ -224,6 +228,18 @@ public class DataAction implements Action {
         info = queryLastInfo(context, info, MicroservicesInfo.class);
         return info;
     }
+    // zx
+    public static MicroservicesInfo queryLastMicroservices_zx(Context context, Long reposId, String repoName, String vmm) {
+        MicroservicesInfo info = new MicroservicesInfo();
+        info.setReposId(reposId);
+        info.setRepoName(repoName);
+        info.setName(InfoNameConstant.MicroservicesForRepos);
+        info.setVersion(vmm);
+        info.setMicroservices(null);
+        info = queryLastInfo(context, info, MicroservicesInfo.class);
+        return info;
+    }
+
 
     public static GitCommitsInfo queryLastGitCommitsInfoForVersion(Context context, Long reposId, String repoName, Version version) {
         GitCommitsInfo info = new GitCommitsInfo();
@@ -290,12 +306,19 @@ public class DataAction implements Action {
         return null;
     }
 
-    public static <I extends Info> I queryLastInfo(Context context, String infoName, Class<I> infoClass) {
+   /*zx public static <I extends Info> I queryLastInfo(Context context, String infoName, Class<I> infoClass) {
         InfoProfile info = new InfoProfile();
         info.setName(infoName);
         info.setInfoClass(infoClass);
         return queryLastInfo(context, info, infoClass);
-    }
+    }*/
+   public static <I extends Info> I queryLastInfo(Context context, String infoName, Class<I> infoClass) {
+       InfoProfile info = new InfoProfile();
+       info.setName(infoName);
+       info.setInfoClass(infoClass);
+       return queryLastInfo(context, info, infoClass);
+   }
+
 
     public static <I extends Info> I queryLastInfo(Context context, Info info, Class<I> infoClass) {
         List<Info> infos = context.InfoRepositoryFactory().getRepository(infoClass).queryDetailsByInfoAndProjectId(

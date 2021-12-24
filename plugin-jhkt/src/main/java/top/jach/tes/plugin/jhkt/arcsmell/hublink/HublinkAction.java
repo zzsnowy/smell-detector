@@ -66,17 +66,18 @@ public class HublinkAction implements Action {
                 map.put(allnodes.get(j),0.0);
             }
         }
-        Set set=map.entrySet();
+        /*Set set=map.entrySet();
         //为了使map能按照value值排序
         List<Map.Entry<String,Double>> list=new ArrayList<Map.Entry<String,Double>>(set);
-        Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+        Collections.sort(list, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));*/
         ElementsValue element=ElementsValue.createInfo();
         element.setName(flag);
-        for(Map.Entry<String,Double> entry:list){
+        element.setValueMap(map);
+        /*for(Map.Entry<String,Double> entry:list){
             String key=entry.getKey();
             double value=entry.getValue();
             element.put(key,(double)value);
-        }
+        }*/
         return element;
     }
     public static ElementsValue calculateHublike2(PairRelationsInfo pairRelationsInfo){
@@ -116,6 +117,7 @@ public class HublinkAction implements Action {
     //static 方法不能跨包调用，要在别的包调用这个方法，就不能声明成static方法
     public static ElementsValue calculateHublikeOut(PairRelationsInfo pairRelationsInfo){
         List<PairRelation> relations = Lists.newArrayList(pairRelationsInfo.getRelations().iterator());
+        //这并不是所有节点名，因为所谓节点来自于relations集合的起点和终点，而relations里面有个版本有4个节点是孤立的，不在集合中
         List<String> nodes=new ArrayList<>();//存储所有节点名//////////所有节点可以用Set<String>来存储
         List<String> sourceNodes=new ArrayList<>();//存储开始节点名
         List<Double> nodesValue=new ArrayList<>();//存储节点对应权重
@@ -142,7 +144,7 @@ public class HublinkAction implements Action {
             nodes.add(relations.get(i).getTargetName());
             endNodes.add(relations.get(i).getTargetName());
             nodesValue.add(relations.get(i).getValue());
-        }
+        }//同一个endNode对应的value不一样是因为对应不同relation，比如某个relation权重是1，另一个是2，则加起来两条线权重为3
 
         // List<String> allnodes=new ArrayList<>(new ArrayList<>(nodes));
         HashMap<String, Double> map = new HashMap<>();

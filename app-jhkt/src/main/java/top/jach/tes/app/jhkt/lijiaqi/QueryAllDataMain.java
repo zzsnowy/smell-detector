@@ -42,6 +42,7 @@ public class QueryAllDataMain extends DevApp {
         for (Version version:
                 versionsInfoForRelease.getVersions()) {//每一轮循环代表一个sheet页
             // 查询version版本下的所有微服务
+            /* zx
             MicroservicesInfo microservices = DataAction.queryLastMicroservices(context, reposInfo.getId(), null, version);
 
             for (Repo repo :
@@ -70,6 +71,7 @@ public class QueryAllDataMain extends DevApp {
                     System.out.println("GitCommitsForMicroserviceInfo  "+microservice.getElementName()+"  "+version.getVersionName());
                 }
             }
+            */
 
         }
         for (Repo repo :

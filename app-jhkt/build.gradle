@@ -17,4 +17,5 @@ dependencies {
     compile group: 'org.apache.poi', name: 'poi', version: '4.1.1'
     compileOnly 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    compile 'com.google.code.gson:gson:2.6.2'
 }

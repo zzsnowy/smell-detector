@@ -63,7 +63,7 @@ public class Ttest {
         double free=getDegreesOfFreedom();
         double t=calculateTvalue();
         TDistribution td=new TDistribution(free);
-        double cumulative = td.cumulativeProbability(t);/////原文是cumulative()方法，但TDistribution类中只有
+        double cumulative = td.cumulativeProbability(t);//原文是cumulative()方法，但TDistribution类中只有
         double p;
         if(t>0) {
             p=(1-cumulative)*2;

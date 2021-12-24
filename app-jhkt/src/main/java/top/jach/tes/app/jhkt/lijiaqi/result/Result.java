@@ -6,6 +6,7 @@ import java.util.*;
 
 @Getter
 public class Result {
+    //String为version字符串
     Map<String, ResultForMs> results = new LinkedHashMap<>();
 
     public Result() {

@@ -1,6 +1,7 @@
 package top.jach.tes.app.jhkt.chenjiali;
 
 import org.apache.commons.collections.ArrayStack;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import top.jach.tes.app.dev.DevApp;
@@ -23,6 +24,7 @@ import top.jach.tes.plugin.tes.code.git.version.Version;
 import top.jach.tes.plugin.tes.code.git.version.VersionsInfo;
 import top.jach.tes.plugin.tes.code.repo.ReposInfo;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -36,24 +38,53 @@ import java.util.stream.Collectors;
  */
 //这边只负责供给各种不同的源数据，用线程池来并发计算AS，并拿到各个AS计算得到的结果
 public class ThresholdTest extends DevApp {
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
         //System.out.println(testUiThreshold().size());
-        /*List<ThresholdResult> data=testUiThreshold();
+        List<Double> list=new ArrayList<>();
+        list.add(3.0);list.add(7.0);list.add(8.0);list.add(13.0);list.add(4.0);list.add(7.0);list.add(5.0);list.add(9.0);
+       //System.out.println(getThresholds(list));
+        List<ThresholdResult> data=testUiThreshold(list);
         System.out.println(data.size());
-        for(int i=0;i<=10;i++){
-            ThresholdResult tr=data.get(i);
-            System.out.println("四个阈值:");
-            System.out.println(tr.getThrhds().toString());
-            System.out.println("运行结果ElementsValue:");
-            System.out.println(new ArrayList<Double>(tr.getElementsValue().getValueMap().values()).toString());
+        exportCSV(data,new File("D:\\data\\tes\\thresholdtest"));
 
-        }*/
-
-        test();//多个版本运行出来的uiAction计算结果要么是[]空的，要么是[11.0]只有一个数字的，
+        //test();//多个版本运行出来的uiAction计算结果要么是[]空的，要么是[11.0]只有一个数字的，
         // excel里是可以对应上哪个微服务是有值的，哪个微服务是没值的
 
 
     }
+
+    public static void exportCSV(List<ThresholdResult> results,File dir) throws IOException {
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
+        FileUtils.cleanDirectory(dir);
+        File file = new File(dir.getAbsolutePath()+"/"+"thresholdtest.csv");
+        StringBuilder sb = new StringBuilder();
+        sb.append("version of source data");
+        sb.append(",");
+        sb.append("thresholds");
+        sb.append(",");
+        sb.append("result values");
+        sb.append(",");
+        sb.append("\n");
+        for(ThresholdResult result:results){
+            sb.append(result.getMicroservicesInfo().getVersion());
+            sb.append(',');
+            for(Double thrhd:result.getThrhds()){
+                sb.append(thrhd);
+                sb.append("/");
+            }
+            sb.append(',');
+            Map<String,Double> values=result.getElementsValue().getValueMap();
+            for(String key:values.keySet()){
+                sb.append(values.get(key)+"  ");
+            }
+            sb.append(",");
+            sb.append("\n");
+        }
+        FileUtils.write(file, sb.toString(), "utf8");
+    }
+    //测试ui检测结果是否正确
     public static void test(){
         //存放各个线程运行结果
         //List<ThresholdResult> resuts=new ArrayList<>();
@@ -98,8 +129,30 @@ public class ThresholdTest extends DevApp {
             System.out.println(new ArrayList<Double>(value.getValueMap().values()).toString());
         }
     }
+    //前端输入给定阈值范围，后台接收数据，自动生成给定范围内的阈值组合。目前用list代替前端输入
+    //list从前往后每两个数组成一个for循环的范围
+    public static List<List<Double>> getThresholds(List<Double> list){
+        List<List<Double>> res=new ArrayList<>();
+        //每个AS需要的阈值个数不一，只能对于每个需要阈值测试的AS分别写一个阈值测试类，据输入AS名不同调用对应的方法或类
+        //ui有四个阈值，故4层for循环，但别的AS阈值不一样
+        for(double i=list.get(0);i<list.get(1);i++){
+            for(double j=list.get(2);j<list.get(3);j++){
+                for(double k=list.get(4);k<list.get(5);k++){
+                    for(double h=list.get(6);h<list.get(7);h++){
+                        List<Double> sublist=new ArrayList<>();
+                        sublist.add(i);
+                        sublist.add(j);
+                        sublist.add(k);
+                        sublist.add(h);
+                        res.add(sublist);
+                    }
+                }
+            }
+        }
+        return res;
+    }
 
-    public static List<ThresholdResult> testUiThreshold(){
+    public static List<ThresholdResult> testUiThreshold(List<Double> list){
         //存放各个线程运行结果
         List<ThresholdResult> resuts=new ArrayList<>();
         //新建线程池
@@ -138,8 +191,9 @@ public class ThresholdTest extends DevApp {
             List<GitCommit> gitCommits=gct.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(o -> o.getReposId() + "#" + o.getRepoName() + "#" + o.getSha()))),ArrayList::new));;
             Collections.sort(gitCommits);
             //获得当前数据源下所有阈值的组合，每一个内嵌的list都是一组阈值
-            List<List<Double>> thrs=new ArrayList<>();
-            for(int ie=3;ie<7;ie++){
+            //自动获取阈值组合改为前端输入各个阈值范围，通过getThresholds方法得出各2阈值组合
+            List<List<Double>> thrs=new ArrayList<>(getThresholds(list));
+            /*for(int ie=3;ie<7;ie++){
                 for(int j=8;j<13;j++){
                     for(int k=4;k<7;k++){
                         for(int h=5;h<9;h++){
@@ -152,7 +206,7 @@ public class ThresholdTest extends DevApp {
                         }
                     }
                 }
-            }
+            }*/
             //根据多种阈值组合计算AS
             for(int l=0;l<thrs.size();l++){
                 synchronized (thrs){
@@ -163,9 +217,6 @@ public class ThresholdTest extends DevApp {
                     int finalL = l;
                     executor.execute(() -> {
                         ElementsValue elementsValue=null;
-                        //根据错误提示定位到一个方法调用链，在调用过程中对List<GitCommit> gitCommits这个共享变量，
-                        //在detectMvResultForUi方法中先进行了sort相当于修改了共享变量，然后又作为 generateFileSetBlocks(gitCommits, microservices)
-                        //该方法的输入，从而导致变量读和写不同步，出现ConcurrentModificationException错误
                         elementsValue = UiAction.calculateUi(gitCommits,len,microservices,pairRelationsInfoWithoutWeight,impact,cochange,change);
                         if(elementsValue!=null){
                                 synchronized (resuts){
@@ -177,13 +228,9 @@ public class ThresholdTest extends DevApp {
                 }
             }
 
-            //之前shutdown写在这里，只是对里层for循环里的线程做了处理，但外面还有一层for(version)的循环，因此要把
-            //shutdown放到两层for循环之外，所有线程均运行完毕之后再shutdown
         }
         executor.shutdown();
-        try {//等待所有线程执行完，主线程再继续执行下面的操作，也就是返回results
-            //有两种情况才会回到主线程执行：1是线程池所有线程执行完，再转去执行主线程，2是线程池执行时间超过了awaitTermination方法的第一个参数的时间，则会自动放弃执行线程池中线程，转去执行主线程
-            //将awaitTermination方法参数值设置到最大，则只有当线程池中所有线程执行完之后才会转去执行主线程
+        try {
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         } catch (InterruptedException e) {
             e.printStackTrace();

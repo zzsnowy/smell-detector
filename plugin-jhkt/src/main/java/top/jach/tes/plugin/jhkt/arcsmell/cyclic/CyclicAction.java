@@ -80,7 +80,47 @@ public class CyclicAction implements Action {
         }
         return DefaultOutputInfos.WithSaveFlag(elementCyclic);
     }
-
+//重写判断List<List<String>>结构里是否存在某一个List<String>的contaons方法
+    public static boolean containsForList(List<List<String>> allList,List<String> oneList){
+        boolean flag=false;
+        for(List<String> lists:allList){
+            if(lists.size()!=oneList.size()){
+                continue;
+            }
+            boolean tf=true;
+            for(String str:lists){
+                if(!oneList.contains(str)){
+                    tf=false;
+                    break;
+                }
+            }
+            if(tf){
+                flag=true;
+                break;
+            }
+        }
+        return flag;
+    }
+    public static boolean containsForSet(List<HashSet<String>> allSet,HashSet<String> oneSet){
+        boolean flag=false;
+        for(Set<String> sets:allSet){
+            if(sets.size()!=oneSet.size()){
+                continue;
+            }
+            boolean tf=true;
+            for(String str:sets){
+                if(!oneSet.contains(str)){
+                    tf=false;
+                    break;
+                }
+            }
+            if(tf){
+                flag=true;
+                break;
+            }
+        }
+        return flag;
+    }
     public static ElementsValue CalculateCyclic(Context context, ElementsInfo elementsInfo, PairRelationsInfo pairRelationsInfo) {
         //构建有向图
         List<Element> nodess = Lists.newArrayList(elementsInfo.iterator());
@@ -92,6 +132,7 @@ public class CyclicAction implements Action {
         int[][] matrix = new int[100][100];//有向图的邻接矩阵
         if (elements.size() > 100) {
             context.Logger().info("elements 超长");
+
         } else {
             //初始化矩阵
             for (PairRelation pr : relations) {
@@ -126,16 +167,19 @@ public class CyclicAction implements Action {
             if (result.size() == 0) {
                 result.add("no cycle dependence");
             }
+            /*result.add("x_25-x_13/x_46f-");
+            result.add("x_33/x744d-x_13/x_46f-x_25-");*/
             //遍历result里存储的每一个元素（也就是一个环），将元素按-切分成子字符串,并存入output_res中
             for (int i = 0; i < result.size(); i++) {
                 List<String> tmp = Arrays.asList(result.get(i).split("-"));//String[]转为List<String>
-                if (!huans.contains(tmp)) {//过滤掉存在含有的节点元素均相同的环路
+                if (containsForList(huans,tmp)==false){//过滤掉存在含有的节点元素均相同的环路
                     huans.add(tmp);//主要是为了运用contains方法
                     HashSet<String> quch_res = new HashSet<>();
                     for (String str : tmp) {
                         quch_res.add(str);//[2,3,2]变成[2,3]
                     }
-                    if (!quch.contains(quch_res)) {
+                    //containsForSet(quch,quch_res)==false
+                    if (containsForSet(quch,quch_res)==false) {//自己重写个方法实现contains的逻辑，这里的contains没起作用
                         quch.add(quch_res);
                         for (String outp : tmp) {//若这个环是未曾出现过的，则将这个环的节点元素加入到输出里面去
                             output_res.add(outp);

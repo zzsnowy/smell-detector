@@ -15,9 +15,9 @@ public class ResultForMs {
     Map<String, Double> cyclic = new HashMap<>();
     Map<String, Double> undirectedCyclic = new HashMap<>();
     List<Mv> mvs;
-    Map<String,Double> unstableDependency=new HashMap<>();
+   /* Map<String,Double> unstableDependency=new HashMap<>();
     Map<String,Double> unstableInterface=new HashMap<>();
-    Map<String,Double> sloppys=new HashMap<>();
+    Map<String,Double> sloppys=new HashMap<>();*/
 
     Map<String, Long> commitCount = new HashMap<>();
     Map<String, Long> bugCount = new HashMap<>();
@@ -34,6 +34,9 @@ public class ResultForMs {
         bugCount.put(mainTain.getElementName(), mainTain.getBugCount());
         commitAddLineCount.put(mainTain.getElementName(), mainTain.getCommitAddLineCount());
         commitDeleteLineCount.put(mainTain.getElementName(), mainTain.getCommitDeleteLineCount());
+        //String name=mainTain.getElementName();
+        long aa=mainTain.getCommitAddLineCount();
+        long bb=mainTain.getCommitDeleteLineCount();
         commitLineCount.put(mainTain.getElementName(), mainTain.getCommitAddLineCount()+mainTain.getCommitDeleteLineCount());
         CommitOverlapRatio.put(mainTain.getElementName(), mainTain.getCommitOverlapRatio());
         CommitFilesetOverlapRatio.put(mainTain.getElementName(), mainTain.getCommitFilesetOverlapRatio());
