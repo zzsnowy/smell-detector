@@ -85,8 +85,7 @@ public class DataAction implements Action {
         for (Version version :
                 versionsInfoForRelease.getVersions()) {
             // 查询当前版本的微服务
-            /* zx
-            MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, vmm);
+            MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
             if (microservices == null || microservices.getMicroservices().size()==0) {
                 continue;
             }
@@ -107,7 +106,7 @@ public class DataAction implements Action {
                 }
             }
             saveInfo(context, microservices);
-            */
+
         }
 
         for (Repo repo :
@@ -126,7 +125,7 @@ public class DataAction implements Action {
                     saveInfo(context, gitCommitsInfoForRepoVersion);
 
                     // 按微服务划分gitcommits
-                    /* zx MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
+                    MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
                     List<Microservice> ms = microservices.microservicesForRepo(repo.getName());
                     for (Microservice m :
                             ms) {
@@ -135,7 +134,7 @@ public class DataAction implements Action {
                         gitCommitsForMicroserviceInfo.setName(InfoNameConstant.GitCommitsForMicroservice);
                         gitCommitsForMicroserviceInfo.setVersion(version.getVersionName());
                         saveInfo(context, gitCommitsForMicroserviceInfo);
-                    }*/
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -144,7 +143,6 @@ public class DataAction implements Action {
 
         for (Version version :
                 versionsInfoForRelease.getVersions()) {
-            /* zx
             MicroservicesInfo microservices = queryLastMicroservices(context, reposInfo.getId(), null, version);
             if (microservices == null){
                 continue;
@@ -153,7 +151,6 @@ public class DataAction implements Action {
             PairRelationsInfo msCallRelations = microservices.callRelationsInfoByTopic(true);
             saveInfo(context, msCallRelations.setName(InfoNameConstant.MicroserviceCallRelation));
             msCallRelations = null;
-             */
         }
 
 
@@ -294,12 +291,6 @@ public class DataAction implements Action {
         return null;
     }
 
-   /*zx public static <I extends Info> I queryLastInfo(Context context, String infoName, Class<I> infoClass) {
-        InfoProfile info = new InfoProfile();
-        info.setName(infoName);
-        info.setInfoClass(infoClass);
-        return queryLastInfo(context, info, infoClass);
-    }*/
    public static <I extends Info> I queryLastInfo(Context context, String infoName, Class<I> infoClass) {
        InfoProfile info = new InfoProfile();
        info.setName(infoName);
