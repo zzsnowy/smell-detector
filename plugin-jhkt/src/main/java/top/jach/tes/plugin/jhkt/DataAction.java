@@ -228,18 +228,6 @@ public class DataAction implements Action {
         info = queryLastInfo(context, info, MicroservicesInfo.class);
         return info;
     }
-    // zx
-    public static MicroservicesInfo queryLastMicroservices_zx(Context context, Long reposId, String repoName, String vmm) {
-        MicroservicesInfo info = new MicroservicesInfo();
-        info.setReposId(reposId);
-        info.setRepoName(repoName);
-        info.setName(InfoNameConstant.MicroservicesForRepos);
-        info.setVersion(vmm);
-        info.setMicroservices(null);
-        info = queryLastInfo(context, info, MicroservicesInfo.class);
-        return info;
-    }
-
 
     public static GitCommitsInfo queryLastGitCommitsInfoForVersion(Context context, Long reposId, String repoName, Version version) {
         GitCommitsInfo info = new GitCommitsInfo();

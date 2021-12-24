@@ -53,9 +53,9 @@ public class DpendencyRelatedMain extends DevApp {
 
         Context context = Environment.contextFactory.createContext(Environment.defaultProject);
 
-        ReposInfo reposInfo = InfoTool.queryLastInfoByNameAndInfoClass(InfoNameConstant.TargetSystem, ReposInfo.class);
+        //zx ReposInfo reposInfo = InfoTool.queryLastInfoByNameAndInfoClass(InfoNameConstant.TargetSystem, ReposInfo.class);
 
-        VersionsInfo versionsInfoForRelease = DataAction.queryLastInfo(context, InfoNameConstant.VersionsForRelease, VersionsInfo.class);
+        //zx VersionsInfo versionsInfoForRelease = DataAction.queryLastInfo(context, InfoNameConstant.VersionsForRelease, VersionsInfo.class);
 
 
         ResultAll result=new ResultAll();
@@ -63,7 +63,7 @@ public class DpendencyRelatedMain extends DevApp {
         List<String> microserviceNames = new ArrayList<>();
         Map<String,List<PairRelation>> vRelations=readRelations("D:\\data\\versionRelations.xls",microserviceNames);//读取5个版本带权重的依赖
         //zx for (int i = 0; i < versionsInfoForRelease.getVersions().size(); i++)
-        {
+        //{
             //zx Version version = versionsInfoForRelease.getVersions().get(0);
             // 查询version版本下的所有微服务
             String vmm = "x_3c9_x_95d.x_893.x_893.x_e09d_";//zx
@@ -87,7 +87,10 @@ public class DpendencyRelatedMain extends DevApp {
 
             //String vmm=version.getVersionName();
             MicroservicesInfo microservices = new MicroservicesInfo();//zx
-
+            for(int i=0;i<microserviceNames.size();i++)
+            {
+                microservices.addMicroservice(new Microservice().setElementName(microserviceNames.get(i)));
+            }
             PairRelationsInfo pairRelationsInfoWithWeight = microservices.callRelationsInfoByTopicWithJsonNew(true,rels);
             pairRelationsInfoWithWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
             InfoTool.saveInputInfos(pairRelationsInfoWithWeight);
@@ -127,7 +130,7 @@ public class DpendencyRelatedMain extends DevApp {
             resultForMs.setRelationWeight(Lists.newArrayList(pairRelationsInfoWithWeight.getRelations().iterator()));
             resultForMs.setRelationNoWeight(Lists.newArrayList(pairRelationsInfoWithoutWeight.getRelations().iterator()));
 
-        }
+        //}
         exportExcel(result,"D:\\data\\versions5\\nearstData\\hubcyclicunstableOutput.xls");
     }
 
