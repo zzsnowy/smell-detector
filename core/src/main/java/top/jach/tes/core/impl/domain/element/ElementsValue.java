@@ -22,6 +22,9 @@ public class ElementsValue extends Info {
         valueMap.put(elementName, value);
         return this;
     }
+    public void setValue(Map<String, Double> valueMap){
+        this.valueMap = valueMap;
+    }
     public Map getValue(){
         return valueMap;
     }
