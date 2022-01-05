@@ -30,6 +30,7 @@ import top.jach.tes.plugin.jhkt.DataAction;
 import top.jach.tes.plugin.jhkt.InfoNameConstant;
 import top.jach.tes.plugin.jhkt.analysis.MicroserviceAttrsInfo;
 import top.jach.tes.plugin.jhkt.arcan.cyclic.CyclicArcanAction;
+import top.jach.tes.plugin.jhkt.arcan.ud.UdArcanAction;
 import top.jach.tes.plugin.jhkt.arcsmell.ArcSmellAction;
 import top.jach.tes.plugin.jhkt.arcsmell.cyclic.CyclicAction;
 import top.jach.tes.plugin.jhkt.arcsmell.hublink.HublinkAction;
@@ -110,14 +111,15 @@ public class DpendencyRelatedMain extends DevApp {
             ElementsValue hublike_no_weight_in=HublinkAction.calculateHublikeIn(pairRelationsInfoWithoutWeight);
             ElementsValue hublike_no_weight_out=HublinkAction.calculateHublikeOut(pairRelationsInfoWithoutWeight);
             ElementsValue cyclicResult = CyclicAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
-            ElementsValue unstable_no_weight=UdAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
+            ElementsValue unstable_no_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
             ElementsValue unstable_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
             //Arcan
             ElementsValue cyclicArcanResult = CyclicArcanAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
+            ElementsValue unstable_no_weight_arcan = UdAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
+            ElementsValue unstable_weight_arcan = UdAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
 
 
-        ResultForAllMs resultForMs = new ResultForAllMs();
-            //zx result.put(version.getVersionName(), resultForMs);
+            ResultForAllMs resultForMs = new ResultForAllMs();
             ResultAll result=new ResultAll();
             result.put(vmm, resultForMs);//zx
             resultForMs.setMicroservice(microserviceNames);
@@ -136,7 +138,10 @@ public class DpendencyRelatedMain extends DevApp {
             ResultAll resultArcan=new ResultAll();
             ResultForAllMs resultForArcanMs = new ResultForAllMs();
             resultArcan.put("arcan",resultForArcanMs);
-            resultForArcanMs.setCyclic(cyclicResult.getValueMap());
+            resultForArcanMs.setCyclic(cyclicArcanResult.getValueMap());
+            resultForArcanMs.setUnstable_weight(unstable_weight_arcan.getValueMap());
+            resultForArcanMs.setUnstable_no_weight(unstable_no_weight_arcan.getValue());
+
         //}
         exportExcel(result,"D:\\data\\versions5\\nearstData\\hubcyclicunstableOutput.xls");
         //exportExcel(resultArcan,"D:\\data\\versions5\\nearstData\\ArcanOutput.xls");

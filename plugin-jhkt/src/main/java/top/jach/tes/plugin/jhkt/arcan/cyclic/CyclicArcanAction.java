@@ -155,9 +155,9 @@ public class CyclicArcanAction implements Action {
             }
             _dfs(matrix, currentNode, flag, dfsTrace, result, dfsFlag);
         }
-        result.stream().forEach(circle -> {
-            System.out.println(circle);
-        });
+//        result.stream().forEach(circle -> {
+//            System.out.println(circle);
+//        });
 
         //把数值表示的环映射为微服务名称表示的环，同时去除自身依赖的情况
         List<List<String>> cycleResult = getCycleResult(result, elements);
