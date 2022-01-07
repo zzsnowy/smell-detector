@@ -115,8 +115,8 @@ public class DpendencyRelatedMain extends DevApp {
             ElementsValue unstable_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
             //Arcan
             ElementsValue cyclicArcanResult = CyclicArcanAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
-            ElementsValue unstable_no_weight_arcan = UdAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
-            ElementsValue unstable_weight_arcan = UdAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
+            ElementsValue unstable_no_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
+            ElementsValue unstable_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
 
 
             ResultForAllMs resultForMs = new ResultForAllMs();
@@ -138,13 +138,23 @@ public class DpendencyRelatedMain extends DevApp {
             ResultAll resultArcan=new ResultAll();
             ResultForAllMs resultForArcanMs = new ResultForAllMs();
             resultArcan.put("arcan",resultForArcanMs);
+            resultForArcanMs.setMicroservice(microserviceNames);
+            resultForArcanMs.setHublike_weight(hublike_weight.getValueMap());
+            resultForArcanMs.setHublike_weight_in(hublike_weight_in.getValueMap());
+            resultForArcanMs.setHublike_weight_out(hublike_weight_out.getValueMap());
+            resultForArcanMs.setHublike_no_weight(hublike_no_weight.getValueMap());
+            resultForArcanMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
+            resultForArcanMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
             resultForArcanMs.setCyclic(cyclicArcanResult.getValueMap());
             resultForArcanMs.setUnstable_weight(unstable_weight_arcan.getValueMap());
             resultForArcanMs.setUnstable_no_weight(unstable_no_weight_arcan.getValue());
+            resultForArcanMs.setRelationWeight(Lists.newArrayList(pairRelationsInfoWithWeight.getRelations().iterator()));
+            resultForArcanMs.setRelationNoWeight(Lists.newArrayList(pairRelationsInfoWithoutWeight.getRelations().iterator()));
+
 
         //}
         exportExcel(result,"D:\\data\\versions5\\nearstData\\hubcyclicunstableOutput.xls");
-        //exportExcel(resultArcan,"D:\\data\\versions5\\nearstData\\ArcanOutput.xls");
+        exportExcel(resultArcan,"D:\\data\\versions5\\nearstData\\ArcanOutput.xls");
 
     }
 
