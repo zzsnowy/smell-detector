@@ -30,6 +30,7 @@ import top.jach.tes.plugin.jhkt.DataAction;
 import top.jach.tes.plugin.jhkt.InfoNameConstant;
 import top.jach.tes.plugin.jhkt.analysis.MicroserviceAttrsInfo;
 import top.jach.tes.plugin.jhkt.arcan.cyclic.CyclicArcanAction;
+import top.jach.tes.plugin.jhkt.arcan.hublink.HublinkArcanAction;
 import top.jach.tes.plugin.jhkt.arcan.ud.UdArcanAction;
 import top.jach.tes.plugin.jhkt.arcsmell.ArcSmellAction;
 import top.jach.tes.plugin.jhkt.arcsmell.cyclic.CyclicAction;
@@ -117,9 +118,11 @@ public class DpendencyRelatedMain extends DevApp {
             ElementsValue cyclicArcanResult = CyclicArcanAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
             ElementsValue unstable_no_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
             ElementsValue unstable_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
+            ElementsValue hub_weight_arcan = HublinkArcanAction.calculateHublike(microservices, hublike_weight_in, hublike_weight_out, hublike_weight);
+            ElementsValue hub_no_weight_arcan = HublinkArcanAction.calculateHublike(microservices, hublike_no_weight_in, hublike_no_weight_out, hublike_no_weight);
 
 
-            ResultForAllMs resultForMs = new ResultForAllMs();
+        ResultForAllMs resultForMs = new ResultForAllMs();
             ResultAll result=new ResultAll();
             result.put(vmm, resultForMs);//zx
             resultForMs.setMicroservice(microserviceNames);
@@ -129,6 +132,8 @@ public class DpendencyRelatedMain extends DevApp {
             resultForMs.setHublike_no_weight(hublike_no_weight.getValueMap());
             resultForMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
             resultForMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
+            resultForMs.setHub_no_weight(hub_weight_arcan.getValueMap());
+            resultForMs.setHub_weight(hub_no_weight_arcan.getValueMap());
             resultForMs.setCyclic(cyclicResult.getValueMap());
             resultForMs.setUnstable_weight(unstable_weight.getValueMap());
             resultForMs.setUnstable_no_weight(unstable_no_weight.getValue());
@@ -145,6 +150,8 @@ public class DpendencyRelatedMain extends DevApp {
             resultForArcanMs.setHublike_no_weight(hublike_no_weight.getValueMap());
             resultForArcanMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
             resultForArcanMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
+            resultForArcanMs.setHub_no_weight(hub_weight_arcan.getValueMap());
+            resultForArcanMs.setHub_weight(hub_no_weight_arcan.getValueMap());
             resultForArcanMs.setCyclic(cyclicArcanResult.getValueMap());
             resultForArcanMs.setUnstable_weight(unstable_weight_arcan.getValueMap());
             resultForArcanMs.setUnstable_no_weight(unstable_no_weight_arcan.getValue());
@@ -204,11 +211,15 @@ public class DpendencyRelatedMain extends DevApp {
             Cell cell6=row.createCell(6);
             cell6.setCellValue("hublike_no_weight_out");
             Cell cell7=row.createCell(7);
-            cell7.setCellValue("cyclic");
+            cell7.setCellValue("hub_weight");
             Cell cell8=row.createCell(8);
-            cell8.setCellValue("ud_weight");
+            cell8.setCellValue("hub_no_weight");
             Cell cell9=row.createCell(9);
-            cell9.setCellValue("ud_no_weight");
+            cell9.setCellValue("cyclic");
+            Cell cell10=row.createCell(10);
+            cell10.setCellValue("ud_weight");
+            Cell cell11=row.createCell(11);
+            cell11.setCellValue("ud_no_weight");
             int rowCount=1;
             for(String ms:microserviceList){
                 Row r=sheet.createRow(rowCount);
@@ -225,12 +236,16 @@ public class DpendencyRelatedMain extends DevApp {
                 r.createCell(5).setCellValue(hbnwi==null?0.0:hbnwi);
                 Double hbnwo=resultForAllMs.getHublike_no_weight_out().get(ms);
                 r.createCell(6).setCellValue(hbnwo==null?0.0:hbnwo);
+                Double hw=resultForAllMs.getHub_weight().get(ms);
+                r.createCell(7).setCellValue(hw==null?0.0:hw);
+                Double hnw=resultForAllMs.getHub_no_weight().get(ms);
+                r.createCell(8).setCellValue(hnw==null?0.0:hnw);
                 Double cy=resultForAllMs.getCyclic().get(ms);
-                r.createCell(7).setCellValue(cy==null?0.0:cy);
+                r.createCell(9).setCellValue(cy==null?0.0:cy);
                 Double uw=resultForAllMs.getUnstable_weight().get(ms);
-                r.createCell(8).setCellValue(uw==null?0.0:uw);
+                r.createCell(10).setCellValue(uw==null?0.0:uw);
                 Double unw=resultForAllMs.getUnstable_no_weight().get(ms);
-                r.createCell(9).setCellValue(unw==null?0.0:unw);
+                r.createCell(11).setCellValue(unw==null?0.0:unw);
                 rowCount++;
             }
             rowCount=rowCount+3;

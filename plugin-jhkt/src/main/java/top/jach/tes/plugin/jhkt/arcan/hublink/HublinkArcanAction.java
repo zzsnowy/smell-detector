@@ -29,6 +29,9 @@ public class HublinkArcanAction implements Action {
 
 
     public static final int MAX_NODE_COUNT = 20;
+
+
+
     @Override
     public String getName() {
         return null;
@@ -73,83 +76,53 @@ public class HublinkArcanAction implements Action {
         ElementsValue element=ElementsValue.createInfo();
         element.setName(flag);
         element.setValueMap(map);
-        /*for(Map.Entry<String,Double> entry:list){
-            String key=entry.getKey();
-            double value=entry.getValue();
-            element.put(key,(double)value);
-        }*/
+
         return element;
     }
-    public static ElementsValue calculateHublike2(PairRelationsInfo pairRelationsInfo){
-        List<PairRelation> relations = Lists.newArrayList(pairRelationsInfo.getRelations().iterator());
-        List<String> nodes=new ArrayList<>();
-        List<Double> nodesValue=new ArrayList<>();
-        Map<String, Double> hublikeMap = new HashMap();
-        for(PairRelation pairRelation: pairRelationsInfo.getRelations()){
-            String source = pairRelation.getSourceName();
-            String target = pairRelation.getTargetName();
-            hublikeMap.put(source,hublikeMap.computeIfAbsent(source, k -> 0d)+pairRelation.getValue());
-            hublikeMap.put(target,hublikeMap.computeIfAbsent(target, k -> 0d)+pairRelation.getValue());
+    public static ElementsValue calculateHublike(MicroservicesInfo microservices, ElementsValue hublike_weight_in, ElementsValue hublike_weight_out, ElementsValue hub) {
+        List<Map.Entry<String, Double>> listIn = new ArrayList<>(hublike_weight_in.getValueMap().entrySet());
+        List<Map.Entry<String, Double>> listOut = new ArrayList<>(hublike_weight_out.getValueMap().entrySet());
+        listIn.sort(new Comparator<Map.Entry<String, Double>>() {
+            @Override
+            public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
+                return o1.getValue().compareTo(o2.getValue());
+            }
+        });
+        listOut.sort(new Comparator<Map.Entry<String, Double>>() {
+            @Override
+            public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
+                return o1.getValue().compareTo(o2.getValue());
+            }
+        });
+        double midIn, midOut;
+        int len = listIn.size();
+        assert len % 2 == 0;
+        if((len % 2) == 0){
+            midIn = (listIn.get(len / 2).getValue() + listIn.get(len / 2 - 1).getValue())/2.0;
+            midOut = (listOut.get(len / 2).getValue() + listOut.get(len / 2 - 1).getValue())/2.0;
+        }else {
+            midIn = listIn.get(len / 2).getValue();
+            midOut = listOut.get(len / 2).getValue();
         }
-
-        List<String> allnodes=new ArrayList<>(new ArrayList<>(nodes));
-        HashMap<String, Double> map = new HashMap<>();
-        return cal(nodes,nodesValue,allnodes,map,HUBLINK_IN_AND_OUT);
-    }
-
-    public static ElementsValue calculateHublike(PairRelationsInfo pairRelationsInfo){
-        List<PairRelation> relations = Lists.newArrayList(pairRelationsInfo.getRelations().iterator());
-        List<String> nodes=new ArrayList<>();//存储所有节点名
-        List<Double> nodesValue=new ArrayList<>();
-        //map存储的不允许重复，而hublink就是为了计算重复次数，改成两个list同步记录节点名和对应的权重值
-        //从而允许重复
-        for(int i=0;i<relations.size();i++){
-            nodes.add(relations.get(i).getSourceName());
-            nodesValue.add(relations.get(i).getValue());
-            nodes.add(relations.get(i).getTargetName());
-            nodesValue.add(relations.get(i).getValue());
+        //若包满足：传入依赖数 > 传入mid && 传出依赖数 > 传出mid &&  |传入依赖数 - 传出依赖数| <= 1/4(传入依赖数 + 传出依赖数)，则认为有异味
+//        for(Map.Entry<String, Double> entry : hublike_weight_in.getValueMap().entrySet()){
+//            if(entry)
+//        }
+        Map<String, Double> mapIn = hublike_weight_in.getValueMap();
+        Map<String, Double> mapOut = hublike_weight_out.getValueMap();
+        ElementsValue element=ElementsValue.createInfo();
+        for(Microservice micro:microservices){
+            String microName=micro.getElementName();
+            if((mapIn.get(microName) > midIn) && (mapOut.get(microName) > midOut) &&
+                    (Math.abs(mapIn.get(microName) - mapOut.get(microName)) <= (hub.getValueMap().get(microName)/4.0))){
+                element.put(microName, 1.0);
+            }else{
+                element.put(microName, 0.0);
+            }
         }
-
-        List<String> allnodes=new ArrayList<>(new ArrayList<>(nodes));
-        HashMap<String, Double> map = new HashMap<>();
-        return cal(nodes,nodesValue,allnodes,map,HUBLINK_IN_AND_OUT);
-    }
-    //static 方法不能跨包调用，要在别的包调用这个方法，就不能声明成static方法
-    public static ElementsValue calculateHublikeOut(PairRelationsInfo pairRelationsInfo){
-        List<PairRelation> relations = Lists.newArrayList(pairRelationsInfo.getRelations().iterator());
-        //这并不是所有节点名，因为所谓节点来自于relations集合的起点和终点，而relations里面有个版本有4个节点是孤立的，不在集合中
-        List<String> nodes=new ArrayList<>();//存储所有节点名//////////所有节点可以用Set<String>来存储
-        List<String> sourceNodes=new ArrayList<>();//存储开始节点名
-        List<Double> nodesValue=new ArrayList<>();//存储节点对应权重
-        for(int i=0;i<relations.size();i++){
-            nodes.add(relations.get(i).getSourceName());
-            nodes.add(relations.get(i).getTargetName());
-            sourceNodes.add(relations.get(i).getSourceName());
-            nodesValue.add(relations.get(i).getValue());
-        }
-
-        // List<String> allnodes=new ArrayList<>(new ArrayList<>(nodes));
-        HashMap<String, Double> map = new HashMap<>();
-        return cal(sourceNodes,nodesValue,nodes,map,HUBLINK__OUT);
+        return element;
     }
 
-    public static ElementsValue calculateHublikeIn(PairRelationsInfo pairRelationsInfo){
-        List<PairRelation> relations = Lists.newArrayList(pairRelationsInfo.getRelations().iterator());
-        List<String> nodes=new ArrayList<>();//存储所有节点名
-        List<String> endNodes=new ArrayList<>();//存储结束节点名
-        List<Double> nodesValue=new ArrayList<>();//存储节点对应权重
-
-        for(int i=0;i<relations.size();i++){
-            nodes.add(relations.get(i).getSourceName());
-            nodes.add(relations.get(i).getTargetName());
-            endNodes.add(relations.get(i).getTargetName());
-            nodesValue.add(relations.get(i).getValue());
-        }//同一个endNode对应的value不一样是因为对应不同relation，比如某个relation权重是1，另一个是2，则加起来两条线权重为3
-
-        // List<String> allnodes=new ArrayList<>(new ArrayList<>(nodes));
-        HashMap<String, Double> map = new HashMap<>();
-        return cal(endNodes,nodesValue,nodes,map,HUBLINK_IN);
-    }
 
 
     //该方法根据元素和元素之间的关系，以此为参数调用方法，输出架构异味
@@ -188,33 +161,6 @@ public class HublinkArcanAction implements Action {
         ElementsValue elementHublink=cal(nodes,nodesValue,allnodes,map,HUBLINK_IN_AND_OUT);
         ElementsValue elementHublink_s=cal(sourceNodes,sourceNodesValue,allnodes,sourceMap,HUBLINK__OUT);
         ElementsValue elementHublink_e=cal(endNodes,endNodesValue,allnodes,endMap,HUBLINK_IN);
-        //return DefaultOutputInfos.WithSaveFlag(elementHublink,elementHublink_s,elementHublink_e);
-/*        //输出,可删除
-        Set set=elementHublink.getValue().entrySet();
-        Set s_set=elementHublink_s.getValue().entrySet();
-        Set e_set=elementHublink_e.getValue().entrySet();
-        List<Map.Entry<String,Double>> list=new ArrayList<Map.Entry<String,Double>>(set);
-        List<Map.Entry<String,Double>> s_list=new ArrayList<Map.Entry<String,Double>>(s_set);
-        List<Map.Entry<String,Double>> e_list=new ArrayList<Map.Entry<String,Double>>(e_set);
-
-        System.out.println("-------Results of hublink AS detecting---------");
-        for(Map.Entry<String, Double> entry : list){
-            String key=entry.getKey();
-            double value=entry.getValue();
-            System.out.println(key+"--"+value);
-        }
-        System.out.println("-------Results of hublink AS detecting_HublinkForIn---------");
-        for(Map.Entry<String, Double> entry : e_list){
-            String key=entry.getKey();
-            double value=entry.getValue();
-            System.out.println(key+"--"+value);
-        }
-        System.out.println("-------Results of hublink AS detecting_HublinkForOut---------");
-        for(Map.Entry<String, Double> entry : s_list){
-            String key=entry.getKey();
-            double value=entry.getValue();
-            System.out.println(key+"--"+value);
-        }*/
 
         return DefaultOutputInfos.WithSaveFlag(elementHublink,elementHublink_s,elementHublink_e);
 

@@ -24,6 +24,8 @@ public class ResultForAllMs {
     Map<String, Double> hublike_no_weight = new HashMap<>();
     Map<String, Double> hublike_no_weight_in = new HashMap<>();
     Map<String, Double> hublike_no_weight_out = new HashMap<>();
+    Map<String, Double> hub_weight = new HashMap<>();
+    Map<String, Double> hub_no_weight = new HashMap<>();
     Map<String, Double> cyclic = new HashMap<>();
     Map<String,Double> unstable_weight=new HashMap<>();
     Map<String,Double> unstable_no_weight=new HashMap<>();
