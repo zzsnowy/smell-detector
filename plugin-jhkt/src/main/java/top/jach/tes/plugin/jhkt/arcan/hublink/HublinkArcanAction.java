@@ -79,7 +79,7 @@ public class HublinkArcanAction implements Action {
 
         return element;
     }
-    public static ElementsValue calculateHublike(MicroservicesInfo microservices, ElementsValue hublike_weight_in, ElementsValue hublike_weight_out, ElementsValue hub) {
+    public static ElementsValue calculateHub(MicroservicesInfo microservices, ElementsValue hublike_weight_in, ElementsValue hublike_weight_out, ElementsValue hub) {
         List<Map.Entry<String, Double>> listIn = new ArrayList<>(hublike_weight_in.getValueMap().entrySet());
         List<Map.Entry<String, Double>> listOut = new ArrayList<>(hublike_weight_out.getValueMap().entrySet());
         listIn.sort(new Comparator<Map.Entry<String, Double>>() {

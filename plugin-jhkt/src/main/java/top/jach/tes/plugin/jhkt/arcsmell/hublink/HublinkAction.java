@@ -29,6 +29,7 @@ public class HublinkAction implements Action {
 
 
     public static final int MAX_NODE_COUNT = 20;
+
     @Override
     public String getName() {
         return null;
@@ -73,11 +74,7 @@ public class HublinkAction implements Action {
         ElementsValue element=ElementsValue.createInfo();
         element.setName(flag);
         element.setValueMap(map);
-        /*for(Map.Entry<String,Double> entry:list){
-            String key=entry.getKey();
-            double value=entry.getValue();
-            element.put(key,(double)value);
-        }*/
+
         return element;
     }
     public static ElementsValue calculateHublike2(PairRelationsInfo pairRelationsInfo){

@@ -55,111 +55,79 @@ public class DpendencyRelatedMain extends DevApp {
     public static void main(String[] args) throws ActionExecuteFailedException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, IOException {
 
         Context context = Environment.contextFactory.createContext(Environment.defaultProject);
-
-        //zx ReposInfo reposInfo = InfoTool.queryLastInfoByNameAndInfoClass(InfoNameConstant.TargetSystem, ReposInfo.class);
-
-        //zx VersionsInfo versionsInfoForRelease = DataAction.queryLastInfo(context, InfoNameConstant.VersionsForRelease, VersionsInfo.class);
-
-
         //注意excel读取，17版的excel及以后的要用XSSFWorkbook，17版以前的用HSSFWorkbook。versionRelations是HSSFWorkbook的
         List<String> microserviceNames = new ArrayList<>();
         Map<String,List<PairRelation>> vRelations=readRelations("D:\\data\\versionRelations.xls",microserviceNames);//读取5个版本带权重的依赖
-        //zx for (int i = 0; i < versionsInfoForRelease.getVersions().size(); i++)
-        //{
-            //zx Version version = versionsInfoForRelease.getVersions().get(0);
-            // 查询version版本下的所有微服务
-            String vmm = "x_3c9_x_95d.x_893.x_893.x_e09d_";//zx
-            //zx MicroservicesInfo microservices = DataAction.queryLastMicroservices(context, reposInfo.getId(), null, version);
-            //zx MicroservicesInfo microservices = DataAction.queryLastMicroservices_zx(context, reposInfo.getId(), null, vmm);//zx
-            //存储单个版中所有微服务名称
-            //zx List<String> microserviceNames = microservices.microserviceNames();
-
-            // 计算并存储微服务间的调用关系，用于后续架构异味的计算
-            List<PairRelation> rels=new ArrayList<>();
-//zx            for(String vmm_tmp:vRelations.keySet()){
-//                if(version.getVersionName().startsWith(vmm_tmp)){
-//                    rels.addAll(vRelations.get(vmm_tmp));
-//                }
-//            }
-            HashSet set = new HashSet(microserviceNames);
-            microserviceNames.clear();
-            microserviceNames.addAll(set);
-
-            rels.addAll(vRelations.get(vmm));//zx
-
-            //String vmm=version.getVersionName();
-            MicroservicesInfo microservices = new MicroservicesInfo();//zx
-            for(int i=0;i<microserviceNames.size();i++)
-            {
-                microservices.addMicroservice(new Microservice().setElementName(microserviceNames.get(i)));
-            }
-            PairRelationsInfo pairRelationsInfoWithWeight = microservices.callRelationsInfoByTopicWithJsonNew(true,rels);
-            pairRelationsInfoWithWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
-            InfoTool.saveInputInfos(pairRelationsInfoWithWeight);
-            //就算不算权重，但不能直接deweight到把一旦存在重复的就删除的地步，至少1,2,3存在重复，只保留1这一条是可以的，不deweight
-            PairRelationsInfo pairRelationsInfoWithoutWeight = microservices.callRelationsInfoByTopicWithJsonNew(false,rels);
-            pairRelationsInfoWithoutWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
-            InfoTool.saveInputInfos(pairRelationsInfoWithoutWeight);
-
-           // PairRelationsInfo p1=microservices.callRelationsInfoByTopic(true);
-           // PairRelationsInfo p2=microservices.callRelationsInfoByTopic(false).deWeight();
-
-            ElementsValue hublike_no_weight = HublinkAction.calculateHublike(pairRelationsInfoWithoutWeight);
-            ElementsValue hublike_weight = HublinkAction.calculateHublike(pairRelationsInfoWithWeight);
-            ElementsValue hublike_weight_in=HublinkAction.calculateHublikeIn(pairRelationsInfoWithWeight);
-            ElementsValue hublike_weight_out=HublinkAction.calculateHublikeOut(pairRelationsInfoWithWeight);
-
-            ElementsValue hublike_no_weight_in=HublinkAction.calculateHublikeIn(pairRelationsInfoWithoutWeight);
-            ElementsValue hublike_no_weight_out=HublinkAction.calculateHublikeOut(pairRelationsInfoWithoutWeight);
-            ElementsValue cyclicResult = CyclicAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
-            ElementsValue unstable_no_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
-            ElementsValue unstable_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
-            //Arcan
-            ElementsValue cyclicArcanResult = CyclicArcanAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
-            ElementsValue unstable_no_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
-            ElementsValue unstable_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
-            ElementsValue hub_weight_arcan = HublinkArcanAction.calculateHublike(microservices, hublike_weight_in, hublike_weight_out, hublike_weight);
-            ElementsValue hub_no_weight_arcan = HublinkArcanAction.calculateHublike(microservices, hublike_no_weight_in, hublike_no_weight_out, hublike_no_weight);
-
+        String vmm = "x_3c9_x_95d.x_893.x_893.x_e09d_";//zx
+        List<PairRelation> rels=new ArrayList<>();
+        HashSet set = new HashSet(microserviceNames);
+        microserviceNames.clear();
+        microserviceNames.addAll(set);
+        rels.addAll(vRelations.get(vmm));//zx
+        MicroservicesInfo microservices = new MicroservicesInfo();//zx
+        for(int i=0;i<microserviceNames.size();i++)
+        {
+            microservices.addMicroservice(new Microservice().setElementName(microserviceNames.get(i)));
+        }
+        PairRelationsInfo pairRelationsInfoWithWeight = microservices.callRelationsInfoByTopicWithJsonNew(true,rels);
+        pairRelationsInfoWithWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
+        InfoTool.saveInputInfos(pairRelationsInfoWithWeight);
+        //就算不算权重，但不能直接deweight到把一旦存在重复的就删除的地步，至少1,2,3存在重复，只保留1这一条是可以的，不deweight
+        PairRelationsInfo pairRelationsInfoWithoutWeight = microservices.callRelationsInfoByTopicWithJsonNew(false,rels);
+        pairRelationsInfoWithoutWeight.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
+        InfoTool.saveInputInfos(pairRelationsInfoWithoutWeight);
+        ElementsValue hublike_no_weight = HublinkAction.calculateHublike(pairRelationsInfoWithoutWeight);
+        ElementsValue hublike_weight = HublinkAction.calculateHublike(pairRelationsInfoWithWeight);
+        ElementsValue hublike_weight_in=HublinkAction.calculateHublikeIn(pairRelationsInfoWithWeight);
+        ElementsValue hublike_weight_out=HublinkAction.calculateHublikeOut(pairRelationsInfoWithWeight);
+        ElementsValue hublike_no_weight_in=HublinkAction.calculateHublikeIn(pairRelationsInfoWithoutWeight);
+        ElementsValue hublike_no_weight_out=HublinkAction.calculateHublikeOut(pairRelationsInfoWithoutWeight);
+        ElementsValue cyclicResult = CyclicAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
+        ElementsValue unstable_no_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
+        ElementsValue unstable_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
+        //Arcan
+        ElementsValue cyclicArcanResult = CyclicArcanAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
+        ElementsValue unstable_no_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
+        ElementsValue unstable_weight_arcan = UdArcanAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
+        ElementsValue hub_weight_arcan = HublinkArcanAction.calculateHub(microservices, hublike_weight_in, hublike_weight_out, hublike_weight);
+        ElementsValue hub_no_weight_arcan = HublinkArcanAction.calculateHub(microservices, hublike_no_weight_in, hublike_no_weight_out, hublike_no_weight);
 
         ResultForAllMs resultForMs = new ResultForAllMs();
-            ResultAll result=new ResultAll();
-            result.put(vmm, resultForMs);//zx
-            resultForMs.setMicroservice(microserviceNames);
-            resultForMs.setHublike_weight(hublike_weight.getValueMap());
-            resultForMs.setHublike_weight_in(hublike_weight_in.getValueMap());
-            resultForMs.setHublike_weight_out(hublike_weight_out.getValueMap());
-            resultForMs.setHublike_no_weight(hublike_no_weight.getValueMap());
-            resultForMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
-            resultForMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
-            resultForMs.setHub_no_weight(hub_weight_arcan.getValueMap());
-            resultForMs.setHub_weight(hub_no_weight_arcan.getValueMap());
-            resultForMs.setCyclic(cyclicResult.getValueMap());
-            resultForMs.setUnstable_weight(unstable_weight.getValueMap());
-            resultForMs.setUnstable_no_weight(unstable_no_weight.getValue());
-            resultForMs.setRelationWeight(Lists.newArrayList(pairRelationsInfoWithWeight.getRelations().iterator()));
-            resultForMs.setRelationNoWeight(Lists.newArrayList(pairRelationsInfoWithoutWeight.getRelations().iterator()));
-            //Arcan输出
-            ResultAll resultArcan=new ResultAll();
-            ResultForAllMs resultForArcanMs = new ResultForAllMs();
-            resultArcan.put("arcan",resultForArcanMs);
-            resultForArcanMs.setMicroservice(microserviceNames);
-            resultForArcanMs.setHublike_weight(hublike_weight.getValueMap());
-            resultForArcanMs.setHublike_weight_in(hublike_weight_in.getValueMap());
-            resultForArcanMs.setHublike_weight_out(hublike_weight_out.getValueMap());
-            resultForArcanMs.setHublike_no_weight(hublike_no_weight.getValueMap());
-            resultForArcanMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
-            resultForArcanMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
-            resultForArcanMs.setHub_no_weight(hub_weight_arcan.getValueMap());
-            resultForArcanMs.setHub_weight(hub_no_weight_arcan.getValueMap());
-            resultForArcanMs.setCyclic(cyclicArcanResult.getValueMap());
-            resultForArcanMs.setUnstable_weight(unstable_weight_arcan.getValueMap());
-            resultForArcanMs.setUnstable_no_weight(unstable_no_weight_arcan.getValue());
-            resultForArcanMs.setRelationWeight(Lists.newArrayList(pairRelationsInfoWithWeight.getRelations().iterator()));
-            resultForArcanMs.setRelationNoWeight(Lists.newArrayList(pairRelationsInfoWithoutWeight.getRelations().iterator()));
+        ResultAll result=new ResultAll();
+        result.put(vmm, resultForMs);//zx
+        resultForMs.setMicroservice(microserviceNames);
+        resultForMs.setHublike_weight(hublike_weight.getValueMap());
+        resultForMs.setHublike_weight_in(hublike_weight_in.getValueMap());
+        resultForMs.setHublike_weight_out(hublike_weight_out.getValueMap());
+        resultForMs.setHublike_no_weight(hublike_no_weight.getValueMap());
+        resultForMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
+        resultForMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
+        resultForMs.setHub_no_weight(hub_weight_arcan.getValueMap());
+        resultForMs.setHub_weight(hub_no_weight_arcan.getValueMap());
+        resultForMs.setCyclic(cyclicResult.getValueMap());
+        resultForMs.setUnstable_weight(unstable_weight.getValueMap());
+        resultForMs.setUnstable_no_weight(unstable_no_weight.getValue());
+        resultForMs.setRelationWeight(Lists.newArrayList(pairRelationsInfoWithWeight.getRelations().iterator()));
+        resultForMs.setRelationNoWeight(Lists.newArrayList(pairRelationsInfoWithoutWeight.getRelations().iterator()));
+        //Arcan输出
+        ResultAll resultArcan=new ResultAll();
+        ResultForAllMs resultForArcanMs = new ResultForAllMs();
+        resultArcan.put("arcan",resultForArcanMs);
+        resultForArcanMs.setMicroservice(microserviceNames);
+        resultForArcanMs.setHublike_weight(hublike_weight.getValueMap());
+        resultForArcanMs.setHublike_weight_in(hublike_weight_in.getValueMap());
+        resultForArcanMs.setHublike_weight_out(hublike_weight_out.getValueMap());
+        resultForArcanMs.setHublike_no_weight(hublike_no_weight.getValueMap());
+        resultForArcanMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
+        resultForArcanMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
+        resultForArcanMs.setHub_no_weight(hub_weight_arcan.getValueMap());
+        resultForArcanMs.setHub_weight(hub_no_weight_arcan.getValueMap());
+        resultForArcanMs.setCyclic(cyclicArcanResult.getValueMap());
+        resultForArcanMs.setUnstable_weight(unstable_weight_arcan.getValueMap());
+        resultForArcanMs.setUnstable_no_weight(unstable_no_weight_arcan.getValue());
+        resultForArcanMs.setRelationWeight(Lists.newArrayList(pairRelationsInfoWithWeight.getRelations().iterator()));
+        resultForArcanMs.setRelationNoWeight(Lists.newArrayList(pairRelationsInfoWithoutWeight.getRelations().iterator()));
 
-
-        //}
         exportExcel(result,"D:\\data\\versions5\\nearstData\\hubcyclicunstableOutput.xls");
         exportExcel(resultArcan,"D:\\data\\versions5\\nearstData\\ArcanOutput.xls");
 
@@ -270,29 +238,6 @@ public class DpendencyRelatedMain extends DevApp {
         workbook.write(outputStream);
         outputStream.close();
         workbook.close();
-
     }
-   /* public static void main(String[] args) {
-        //微服务和关系
-        MicroservicesInfo microservices = InfoTool.queryLastInfoByNameAndInfoClass(InfoNameConstant.MicroservicesForRepos, MicroservicesInfo.class);
 
-        microservices = MicroservicesInfo.createInfoByExcludeMicroservice(microservices,  "x_2b", "x_1b", "x_23", "x_1d/x_6eed");
-        microservices.setName(InfoNameConstant.MicroservicesForReposExcludeSomeHistory);
-        InfoTool.saveInputInfos(microservices);
-
-        PairRelationsInfo pairRelationsInfo = microservices.callRelationsInfoByTopic(false);
-        pairRelationsInfo.setName(InfoNameConstant.MicroserviceExcludeSomeCallRelation);
-        InfoTool.saveInputInfos(pairRelationsInfo);
-
-
-        InputInfoProfiles infoProfileMap = InputInfoProfiles.InputInfoProfiles()
-                .addInfoProfile(ArcSmellAction.Elements_INFO, microservices)
-                .addInfoProfile(ArcSmellAction.PAIR_RELATIONS_INFO, pairRelationsInfo)
-                ;
-
-        Action action = new HublinkAction();
-        TaskTool.excuteActionAndSaveInfo(action, infoProfileMap);
-      *//*  action = new CyclicAction();
-        TaskTool.excuteActionAndSaveInfo(action, infoProfileMap);*//*
-    }*/
 }
