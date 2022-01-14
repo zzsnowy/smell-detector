@@ -57,14 +57,14 @@ public class DpendencyRelatedMain extends DevApp {
         Context context = Environment.contextFactory.createContext(Environment.defaultProject);
         //注意excel读取，17版的excel及以后的要用XSSFWorkbook，17版以前的用HSSFWorkbook。versionRelations是HSSFWorkbook的
         List<String> microserviceNames = new ArrayList<>();
-        Map<String,List<PairRelation>> vRelations=readRelations("D:\\data\\versionRelations.xls",microserviceNames);//读取5个版本带权重的依赖
-        String vmm = "x_3c9_x_95d.x_893.x_893.x_e09d_";//zx
+        Map<String,List<PairRelation>> vRelations=readRelations("D:\\data\\dop.xls",microserviceNames);//读取5个版本带权重的依赖
+        String vmm = "x_3c9_x_95d.x_893.x_893.x_e09d_";
         List<PairRelation> rels=new ArrayList<>();
         HashSet set = new HashSet(microserviceNames);
         microserviceNames.clear();
         microserviceNames.addAll(set);
-        rels.addAll(vRelations.get(vmm));//zx
-        MicroservicesInfo microservices = new MicroservicesInfo();//zx
+        rels.addAll(vRelations.get(vmm));
+        MicroservicesInfo microservices = new MicroservicesInfo();
         for(int i=0;i<microserviceNames.size();i++)
         {
             microservices.addMicroservice(new Microservice().setElementName(microserviceNames.get(i)));
@@ -82,6 +82,8 @@ public class DpendencyRelatedMain extends DevApp {
         ElementsValue hublike_weight_out=HublinkAction.calculateHublikeOut(pairRelationsInfoWithWeight);
         ElementsValue hublike_no_weight_in=HublinkAction.calculateHublikeIn(pairRelationsInfoWithoutWeight);
         ElementsValue hublike_no_weight_out=HublinkAction.calculateHublikeOut(pairRelationsInfoWithoutWeight);
+        ElementsValue hub_weight = new ElementsValue();
+        ElementsValue hub_no_weight = new ElementsValue();
         ElementsValue cyclicResult = CyclicAction.CalculateCyclic(context, microservices, pairRelationsInfoWithWeight);
         ElementsValue unstable_no_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithoutWeight);
         ElementsValue unstable_weight= UdAction.calculateUdNew(microservices,pairRelationsInfoWithWeight);
@@ -102,8 +104,8 @@ public class DpendencyRelatedMain extends DevApp {
         resultForMs.setHublike_no_weight(hublike_no_weight.getValueMap());
         resultForMs.setHublike_no_weight_in(hublike_no_weight_in.getValueMap());
         resultForMs.setHublike_no_weight_out(hublike_no_weight_out.getValueMap());
-        resultForMs.setHub_no_weight(hub_weight_arcan.getValueMap());
-        resultForMs.setHub_weight(hub_no_weight_arcan.getValueMap());
+        resultForMs.setHub_no_weight(hub_weight.getValueMap());
+        resultForMs.setHub_weight(hub_no_weight.getValueMap());
         resultForMs.setCyclic(cyclicResult.getValueMap());
         resultForMs.setUnstable_weight(unstable_weight.getValueMap());
         resultForMs.setUnstable_no_weight(unstable_no_weight.getValue());
@@ -141,7 +143,7 @@ public class DpendencyRelatedMain extends DevApp {
         // zx for(int i=0;i<5;i++)
         {//5个版本，对应5个sheet页
             List<PairRelation> rels=new ArrayList<>();
-            //zx HSSFSheet sheet=workbook.getSheetAt(i);
+            // HSSFSheet sheet=workbook.getSheetAt(i);
             HSSFSheet sheet=workbook.getSheetAt(0);
             String vname=sheet.getSheetName();
             int rows=sheet.getLastRowNum();
@@ -152,7 +154,6 @@ public class DpendencyRelatedMain extends DevApp {
                     microserviceNames.add(row.getCell(0).getStringCellValue());
                     microserviceNames.add(row.getCell(1).getStringCellValue());
                 rels.add(pr);
-                //versionMap.put(new PairRelation(row.getCell(0).getStringCellValue(),row.getCell(1).getStringCellValue()),Double.valueOf(row.getCell(2).getStringCellValue()));
             }
             res.put(vname,rels);
         }

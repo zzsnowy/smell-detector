@@ -6,6 +6,7 @@ plugins {
 group 'top.jach.tes'
 version '1.0-SNAPSHOT'
 
+
 // 所有子项目的通用配置
 subprojects {
     apply plugin: 'idea'
@@ -31,6 +32,7 @@ subprojects {
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
     }
+    task allDeps(type: DependencyReportTask) {}
 
 }
 

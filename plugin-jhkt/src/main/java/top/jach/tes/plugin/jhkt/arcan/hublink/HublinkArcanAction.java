@@ -82,18 +82,8 @@ public class HublinkArcanAction implements Action {
     public static ElementsValue calculateHub(MicroservicesInfo microservices, ElementsValue hublike_weight_in, ElementsValue hublike_weight_out, ElementsValue hub) {
         List<Map.Entry<String, Double>> listIn = new ArrayList<>(hublike_weight_in.getValueMap().entrySet());
         List<Map.Entry<String, Double>> listOut = new ArrayList<>(hublike_weight_out.getValueMap().entrySet());
-        listIn.sort(new Comparator<Map.Entry<String, Double>>() {
-            @Override
-            public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
-                return o1.getValue().compareTo(o2.getValue());
-            }
-        });
-        listOut.sort(new Comparator<Map.Entry<String, Double>>() {
-            @Override
-            public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
-                return o1.getValue().compareTo(o2.getValue());
-            }
-        });
+        listIn.sort(Comparator.comparing(Map.Entry::getValue));
+        listOut.sort(Comparator.comparing(Map.Entry::getValue));
         double midIn, midOut;
         int len = listIn.size();
         assert len % 2 == 0;
@@ -104,10 +94,6 @@ public class HublinkArcanAction implements Action {
             midIn = listIn.get(len / 2).getValue();
             midOut = listOut.get(len / 2).getValue();
         }
-        //若包满足：传入依赖数 > 传入mid && 传出依赖数 > 传出mid &&  |传入依赖数 - 传出依赖数| <= 1/4(传入依赖数 + 传出依赖数)，则认为有异味
-//        for(Map.Entry<String, Double> entry : hublike_weight_in.getValueMap().entrySet()){
-//            if(entry)
-//        }
         Map<String, Double> mapIn = hublike_weight_in.getValueMap();
         Map<String, Double> mapOut = hublike_weight_out.getValueMap();
         ElementsValue element=ElementsValue.createInfo();
