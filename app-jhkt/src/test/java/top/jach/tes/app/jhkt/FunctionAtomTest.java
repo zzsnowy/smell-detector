@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static preprocess.fileUtil.readFile;
+import static top.jach.tes.app.jhkt.codetopics.preprocess.fileUtil.readFile;
 
 public class FunctionAtomTest {
 

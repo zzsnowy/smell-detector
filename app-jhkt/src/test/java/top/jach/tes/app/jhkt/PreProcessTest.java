@@ -1,15 +1,15 @@
 package top.jach.tes.app.jhkt;
 
 import org.junit.Test;
-import preprocess.Corpus;
-import preprocess.PreProcessMethods;
+import top.jach.tes.app.jhkt.codetopics.preprocess.Corpus;
+import top.jach.tes.app.jhkt.codetopics.preprocess.PreProcessMethods;
 
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static preprocess.CommonStopWordList.myStopWords;
+import static top.jach.tes.app.jhkt.codetopics.preprocess.CommonStopWordList.myStopWords;
 
 public class PreProcessTest {
 

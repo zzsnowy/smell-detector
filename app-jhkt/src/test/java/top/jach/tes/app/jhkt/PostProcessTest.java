@@ -2,22 +2,22 @@ package top.jach.tes.app.jhkt;
 
 import com.alibaba.excel.EasyExcel;
 import com.google.gson.Gson;
-import top.jach.tes.app.jhkt.codetopic.lda.Inferencer;
-import top.jach.tes.app.jhkt.codetopic.lda.LDAOption;
-import top.jach.tes.app.jhkt.codetopic.lda.Model;
+import top.jach.tes.app.jhkt.codetopics.lda.Inferencer;
+import top.jach.tes.app.jhkt.codetopics.lda.LDAOption;
+import top.jach.tes.app.jhkt.codetopics.lda.Model;
 import org.junit.Test;
-import top.jach.tes.app.jhkt.codetopic.postprocess.FileDependence;
-import top.jach.tes.app.jhkt.codetopic.postprocess.FunctionalTopic;
-import top.jach.tes.app.jhkt.codetopic.postprocess.FunctionalTopicUtil;
-import top.jach.tes.app.jhkt.codetopic.preprocess.excel.ServiceData;
-import top.jach.tes.app.jhkt.codetopic.preprocess.excel.ServiceListener;
+import top.jach.tes.app.jhkt.codetopics.postprocess.FileDependence;
+import top.jach.tes.app.jhkt.codetopics.postprocess.FunctionalTopic;
+import top.jach.tes.app.jhkt.codetopics.postprocess.FunctionalTopicUtil;
+import top.jach.tes.app.jhkt.codetopics.preprocess.excel.ServiceData;
+import top.jach.tes.app.jhkt.codetopics.preprocess.excel.ServiceListener;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static preprocess.fileUtil.readFile;
+import static top.jach.tes.app.jhkt.codetopics.preprocess.fileUtil.readFile;
 
 public class PostProcessTest {
 
@@ -228,7 +228,7 @@ public class PostProcessTest {
      * @return
      */
     private List<List<Double>> readFileTopicMap() {
-        String theta = "D:\\data\\codeTopics\\src\\test\\example\\model-final.theta";
+        String theta = "C:\\Users\\zhao\\Desktop\\codeTopics\\src\\test\\example\\model-final.theta";
         List<List<Double>> result = new ArrayList<>();
         try {
             FileInputStream is = new FileInputStream(theta);

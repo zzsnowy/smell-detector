@@ -1,9 +1,9 @@
 package top.jach.tes.app.jhkt;
 
-import top.jach.tes.app.jhkt.codetopic.lda.Estimator;
-import top.jach.tes.app.jhkt.codetopic.lda.Inferencer;
-import top.jach.tes.app.jhkt.codetopic.lda.LDAOption;
-import top.jach.tes.app.jhkt.codetopic.lda.Model;
+import top.jach.tes.app.jhkt.codetopics.lda.Estimator;
+import top.jach.tes.app.jhkt.codetopics.lda.Inferencer;
+import top.jach.tes.app.jhkt.codetopics.lda.LDAOption;
+import top.jach.tes.app.jhkt.codetopics.lda.Model;
 import org.junit.Test;
 
 import java.util.Arrays;

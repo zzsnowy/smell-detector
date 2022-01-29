@@ -4,10 +4,10 @@ import com.alibaba.excel.EasyExcel;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
-import top.jach.tes.app.jhkt.codetopic.lda.*;
-import top.jach.tes.app.jhkt.codetopic.preprocess.*;
-import preprocess.excel.ExcelData;
-import preprocess.excel.ExcelListener;
+import top.jach.tes.app.jhkt.codetopics.lda.*;
+import top.jach.tes.app.jhkt.codetopics.preprocess.*;
+import top.jach.tes.app.jhkt.codetopics.preprocess.excel.ExcelData;
+import top.jach.tes.app.jhkt.codetopics.preprocess.excel.ExcelListener;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -15,8 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static top.jach.tes.app.jhkt.codetopic.common.Constant.*;
-import static preprocess.CommonStopWordList.myStopWords;
+import static top.jach.tes.app.jhkt.codetopics.common.Constant.*;
+import static top.jach.tes.app.jhkt.codetopics.preprocess.CommonStopWordList.myStopWords;
 
 /**
  * @author:AdminChen
