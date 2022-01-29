@@ -1,0 +1,17 @@
+/target_projects/codeTopics/src/main/java/lda/Inferencer.java
+/target_projects/codeTopics/src/main/java/postprocess/FileDependence.java
+/target_projects/codeTopics/src/main/java/postprocess/FunctionalTopicUtil.java
+/target_projects/codeTopics/src/main/java/preprocess/Corpus.java
+/target_projects/codeTopics/src/main/java/lda/LDADataset.java
+/target_projects/codeTopics/src/main/java/preprocess/fileUtil.java
+/target_projects/codeTopics/src/main/java/postprocess/FunctionalTopic.java
+/target_projects/codeTopics/src/main/java/lda/LDAOption.java
+/target_projects/codeTopics/src/main/java/preprocess/PreProcessMethods.java
+/target_projects/codeTopics/src/main/java/lda/Dictionary.java
+/target_projects/codeTopics/src/main/java/lda/Model.java
+/target_projects/codeTopics/src/main/java/lda/Constants.java
+/target_projects/codeTopics/src/main/java/preprocess/Document.java
+/target_projects/codeTopics/src/main/java/preprocess/CommonStopWordList.java
+/target_projects/codeTopics/src/main/java/lda/WordBag.java
+/target_projects/codeTopics/src/main/java/lda/Estimator.java
+/target_projects/codeTopics/src/main/java/lda/Pair.java
